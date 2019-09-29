@@ -6,7 +6,7 @@ using VkNet.Model;
 
 namespace VkQueue
 { 
-    internal static class VkQueue
+    internal class VkQueue
     {
         public static Queue<User> ConversationQueue { get; set; } = new Queue<User>();
         
@@ -18,12 +18,14 @@ namespace VkQueue
 
         public static string Message { get; set; } = "";
 
-        public static bool ObjContains(User obj)
+        public static bool Contains(User obj)
         {
             var userEquality = new UserEquality();
             
             return ConversationQueue.Contains(obj, userEquality);
         }
+
+        
     }
 
     internal class UserEquality : IEqualityComparer<User>

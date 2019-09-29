@@ -1,6 +1,4 @@
-﻿using System;
-using VkNet;
-using VkQueue.VkObjects;
+﻿using VkQueue.VkObjects;
 
 namespace VkQueue
 {
@@ -16,7 +14,7 @@ namespace VkQueue
                 return;
 
             // check if user contains in VkQueue
-            if (VkQueue.ObjContains(user))
+            if (VkQueue.Contains(user))
                 return;
 
             VkQueue.ConversationQueue.Enqueue(user);
@@ -57,7 +55,7 @@ namespace VkQueue
             {
                 var user = VkModule.GetUser(VkQueue.VkApi, userId);
 
-                if (VkQueue.ObjContains(user))
+                if (VkQueue.Contains(user))
                     return;
 
                 VkQueue.ConversationQueue.Enqueue(user);
