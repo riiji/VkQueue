@@ -8,9 +8,11 @@ using VkNet.Model.RequestParams;
 
 namespace VkQueue.VkObjects
 {
-    internal static class VkModule
+    internal class VkModule
     {
-        public static VkApi GetVkApi(string login, string password)
+        public static VkApi VkApi { get; set; }
+
+        public VkApi GetVkApi(Config cfg)
         {
             var services = new ServiceCollection();
             services.AddAudioBypass();
@@ -20,8 +22,8 @@ namespace VkQueue.VkObjects
             {
                 result.Authorize(new ApiAuthParams
                 {
-                    Login = login,
-                    Password = password,
+                    Login = cfg.Login,
+                    Password = cfg.Password,
                     Settings = Settings.All,
                 });
 
@@ -33,15 +35,17 @@ namespace VkQueue.VkObjects
                 return null;
             }
 
+            VkApi = result;
+
             return result;
 
         }
 
-        public static long? SendMessageInConversation(VkApi api, string message, long conversationId, int randomId)
+        public long? SendMessageInConversation(string message, long conversationId, int randomId)
         {
             try
             {
-                var messageId = api.Messages.Send(new MessagesSendParams
+                var messageId = VkApi.Messages.Send(new MessagesSendParams
                 {
                     PeerId = conversationId,
                     RandomId = randomId,
@@ -59,18 +63,18 @@ namespace VkQueue.VkObjects
             }
         }
 
-        public static void EditMessageInConversation(VkApi api, string message, long conversationId, long messageId)
+        public void EditMessageInConversation(string message, long conversationId, long messageId)
         {
             try
             {
-                api.Messages.Edit(new MessageEditParams
+                VkApi.Messages.Edit(new MessageEditParams
                 {
-                    MessageId = VkQueue.MessageId,
+                    MessageId = VkQueue.Instance.MessageId,
                     PeerId = conversationId,
-                    Message = VkQueue.Message
+                    Message = VkQueue.Instance.Message
                 });
 
-                VkQueue.Message = message;
+                VkQueue.Instance.Message = message;
 
                 Console.WriteLine(new LogMessage("VkModule", $"Message {messageId} edited"));
 
@@ -81,14 +85,14 @@ namespace VkQueue.VkObjects
             }
         }
 
-        public static void DeleteMessageInConversation(VkApi api, long conversationId, long messageId, bool clear)
+        public void DeleteMessageInConversation(long conversationId, long messageId, bool clear)
         {
             try
             {
-                VkQueue.VkApi.Messages.Delete(new[] { (ulong)messageId }, null, null, true);
+                VkApi.Messages.Delete(new[] { (ulong)messageId }, null, null, true);
 
                 if (clear)
-                    Utilities.ClearQueue();
+                    VkQueue.Instance = new VkQueue();
 
                 Console.WriteLine(new LogMessage("VkModule", $"Message {messageId} deleted"));
             }
@@ -98,21 +102,21 @@ namespace VkQueue.VkObjects
             }
         }
 
-        public static void UpMessageInConversation(VkApi api, string message, long conversationId, long messageId, int randomId)
+        public void UpMessageInConversation(string message, long conversationId, long messageId, int randomId)
         {
-            VkModule.DeleteMessageInConversation(api, conversationId, messageId,false);
+            DeleteMessageInConversation(conversationId, messageId,false);
 
-            var newMessageId = VkModule.SendMessageInConversation(api, message, conversationId, randomId);
+            var newMessageId = SendMessageInConversation(message, conversationId, randomId);
 
             if (newMessageId != null)
-                VkQueue.MessageId = (long)newMessageId;
+                VkQueue.Instance.MessageId = (long)newMessageId;
         }
 
-        public static long? SendMessageInPM(VkApi api, string message, long userId, int randomId)
+        public long? SendMessageInPM(string message, long userId, int randomId)
         {
             try
             {
-                var messageId = api.Messages.Send(new MessagesSendParams
+                var messageId = VkApi.Messages.Send(new MessagesSendParams
                 {
                     UserId = userId,
                     RandomId = randomId,
@@ -131,7 +135,7 @@ namespace VkQueue.VkObjects
             }
         }
 
-        public static User GetUser(VkApi api, long userId)
+        public User GetUser(VkApi api, long userId)
         {
             try
             {

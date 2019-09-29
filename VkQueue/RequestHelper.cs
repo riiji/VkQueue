@@ -52,26 +52,28 @@ namespace VkQueue
             // if conversationId < 2000000000, its not a conversation, its a dialog check documentation vk api
             switch (command)
             {
-                case "push":
+                case "push" when conversationId >= 2000000000:
+                    Commands.Push(conversationId, userId.From);
+                    break;
 
-                    if (conversationId < 2000000000)
-                        Commands.PushInPM(conversationId);
-                    else
-                        Commands.Push(conversationId, userId.From);
+                case "push" when conversationId < 2000000000:
+                    Commands.PushInPM(conversationId);
                     break;
-                case "pop":
-                    if (conversationId < 2000000000)
-                        Commands.PopInPM(conversationId);
-                    else
-                        Commands.Pop(conversationId);
+
+                case "pop" when conversationId >= 2000000000:
+                    Commands.Pop(conversationId);
                     break;
-                case "up":
-                    if (conversationId >= 2000000000)
-                        Commands.Up(conversationId, userId.From);
+
+                case "pop" when conversationId < 2000000000:
+                    Commands.PopInPM(conversationId);
                     break;
-                case "clear":
-                    if (conversationId >= 2000000000)
-                        Commands.Clear(conversationId);
+
+                case "up" when conversationId >= 2000000000:
+                    Commands.Up(conversationId, userId.From);
+                    break;
+
+                case "clear" when conversationId >= 2000000000:
+                    Commands.Clear(conversationId);
                     break;
             }
         }

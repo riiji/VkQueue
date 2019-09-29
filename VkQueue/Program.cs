@@ -6,12 +6,13 @@ using VkQueue.VkObjects;
 namespace VkQueue
 {
     internal class Program
-    { 
+    {
+        private static readonly VkModule VkModule = new VkModule();
         public async Task MainAsync()
         {
-            VkQueue.VkApi = VkModule.GetVkApi("login", "password");
+            VkModule.VkApi = VkModule.GetVkApi(Utilities.GetConfig());
 
-            var longPollServer = VkQueue.VkApi.Messages.GetLongPollServer();
+            var longPollServer = VkModule.VkApi.Messages.GetLongPollServer();
 
             LongPollRequestAsync(longPollServer);
 

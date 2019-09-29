@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using Newtonsoft.Json;
 using VkNet.Model;
 
@@ -7,6 +9,20 @@ namespace VkQueue
 {
     internal static class Utilities
     {
+        public static Config GetConfig()
+        {
+            DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(Config));
+
+            Config cfg;
+
+            using (var fs = new FileStream("config.json", FileMode.Open))
+            {
+                cfg = (Config)jsonFormatter.ReadObject(fs);
+            }
+
+            return cfg;
+        }
+
         public static Random Random { get; set; } = new Random();
 
         public static T ConvertJsonToObject<T>(string s)
@@ -34,14 +50,6 @@ namespace VkQueue
             }
 
             return s.Remove(fi, li - fi);
-        }
-
-        public static void ClearQueue()
-        {
-            VkQueue.Message = "";
-            VkQueue.MessageId = -1;
-            VkQueue.ConversationQueue = new Queue<User>();
-            VkQueue.ConversationId = -1;
         }
     }
 }
