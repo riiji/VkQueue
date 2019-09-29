@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using VkNet.Model;
 
 namespace VkQueue
 {
@@ -32,6 +34,14 @@ namespace VkQueue
             }
 
             return s.Remove(fi, li - fi);
+        }
+
+        public static void ClearQueue()
+        {
+            VkQueue.Message = "";
+            VkQueue.MessageId = -1;
+            VkQueue.ConversationQueue = new Queue<User>();
+            VkQueue.ConversationId = -1;
         }
     }
 }

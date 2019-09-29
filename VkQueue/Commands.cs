@@ -1,118 +1,117 @@
 ﻿using System;
-using System.Collections.Generic;
-using VkNet.Enums.Filters;
-using VkNet.Model;
-using VkNet.Model.RequestParams;
+using VkNet;
+using VkQueue.VkObjects;
 
 namespace VkQueue
 {
     internal class Commands
     {
-        public static void Push(long peerId, long userId)
+        public static void Push(long conversationId, long userId)
         {
-            var user = VkQueue.VkApi.Users.Get(new[] { userId }, ProfileFields.All)[0];
+            // get vk user 
+            var user = VkModule.GetUser(VkQueue.VkApi, userId);
 
+            // check user on null
+            if (user == null)
+                return;
+
+            // check if user contains in VkQueue
             if (VkQueue.ObjContains(user))
                 return;
 
-            VkQueue.PeerQueue.Enqueue(user);
+            VkQueue.ConversationQueue.Enqueue(user);
 
-            try
+            if (VkQueue.MessageId == -1)
             {
-                if (VkQueue.MessageId == -1)
+                VkQueue.Message = $"Очередь:\n{user.FirstName} {user.LastName}\n";
+
+                var messageId = VkModule.SendMessageInConversation(VkQueue.VkApi, VkQueue.Message, conversationId, Utilities.Random.Next());
+
+                if (messageId != null)
                 {
-                    VkQueue.Message = $"Очередь:\n{user.FirstName} {user.LastName}\n";
-                    VkQueue.MessageId = VkQueue.VkApi.Messages.Send(new MessagesSendParams
-                    {
-                        PeerId = peerId,
-                        RandomId = Utilities.Random.Next(),
-                        Message = VkQueue.Message
-                    });
-                }
-                else
-                {
-                    VkQueue.Message = VkQueue.Message + $"{user.FirstName} {user.LastName}\n";
-                    VkQueue.VkApi.Messages.Edit(new MessageEditParams
-                    {
-                        MessageId = VkQueue.MessageId,
-                        PeerId = peerId,
-                        Message = VkQueue.Message
-                    });
+                    VkQueue.MessageId = (long)messageId;
+                    VkQueue.ConversationId = conversationId;
                 }
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine(e.Message);
+                if (VkQueue.ConversationId != conversationId)
+                {
+                    VkModule.SendMessageInConversation(VkQueue.VkApi, "Очередь уже создана в другой беседе", conversationId, Utilities.Random.Next());
+                    return;
+                }
+
+                VkQueue.Message += $"{user.FirstName} {user.LastName}\n";
+
+                VkModule.EditMessageInConversation(VkQueue.VkApi, VkQueue.Message, conversationId, VkQueue.MessageId);
             }
         }
 
-        public static void Pop(long peerId)
+        public static void PushInPM(long userId)
         {
-            if (VkQueue.PeerQueue.Count == 0)
+            if (VkQueue.MessageId == -1)
+            {
+                VkModule.SendMessageInPM(VkQueue.VkApi, "Невозможно создать очередь в личных сообщениях", userId, Utilities.Random.Next());
+            }
+            else
+            {
+                var user = VkModule.GetUser(VkQueue.VkApi, userId);
+
+                if (VkQueue.ObjContains(user))
+                    return;
+
+                VkQueue.ConversationQueue.Enqueue(user);
+
+                VkQueue.Message += $"{user.FirstName} {user.LastName}\n";
+
+                VkModule.EditMessageInConversation(VkQueue.VkApi, VkQueue.Message, VkQueue.ConversationId, VkQueue.MessageId);
+            }
+        }
+
+        public static void Pop(long conversationId)
+        {
+            if (VkQueue.ConversationQueue.Count == 0)
                 return;
 
-            VkQueue.PeerQueue.Dequeue();
-
-            try
-            { 
-                if (VkQueue.PeerQueue.Count == 0)
-                {
-                    VkQueue.VkApi.Messages.Delete(new[] { (ulong)VkQueue.MessageId }, null, null, true);
-                    VkQueue.MessageId = -1;
-                    VkQueue.Message = "";
-                }
-                else
-                {
-                    VkQueue.Message = Utilities.RemoveFirstLine(VkQueue.Message);
-
-                    VkQueue.VkApi.Messages.Edit(new MessageEditParams
-                    {
-                        MessageId = VkQueue.MessageId,
-                        PeerId = peerId,
-                        Message = VkQueue.Message,
-                    });
-                }
-            }
-            catch (Exception e)
+            if (VkQueue.ConversationId != -1 && VkQueue.ConversationId != conversationId)
             {
-                Console.WriteLine(e);
-                throw;
+                VkModule.SendMessageInConversation(VkQueue.VkApi, "Невозможно вызвать pop в другой беседе", conversationId, Utilities.Random.Next());
+                return;
+            }
+
+            VkQueue.ConversationQueue.Dequeue();
+
+            if (VkQueue.ConversationQueue.Count == 0)
+            {
+                VkModule.DeleteMessageInConversation(VkQueue.VkApi, conversationId, VkQueue.MessageId, true);
+            }
+            else
+            {
+                VkQueue.Message = Utilities.RemoveFirstLine(VkQueue.Message);
+
+                VkModule.EditMessageInConversation(VkQueue.VkApi, VkQueue.Message, conversationId, VkQueue.MessageId);
             }
         }
 
-        public static void Up(long peerId, long userId)
+        public static void PopInPM(long userId)
         {
-            try
-            {
-                VkQueue.VkApi.Messages.Delete(new[] { (ulong)VkQueue.MessageId }, null, null, true);
-                VkQueue.MessageId = VkQueue.VkApi.Messages.Send(new MessagesSendParams
-                {
-                    PeerId = peerId,
-                    RandomId = Utilities.Random.Next(),
-                    Message = VkQueue.Message,
-                });
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            VkModule.SendMessageInPM(VkQueue.VkApi, "Нельзя вызвать pop в личных сообщениях", userId, Utilities.Random.Next());
         }
 
-        public static void Clear()
+        public static void Up(long conversationId, long userId)
         {
-            try
+            VkModule.UpMessageInConversation(VkQueue.VkApi,VkQueue.Message,VkQueue.ConversationId,VkQueue.MessageId,Utilities.Random.Next());
+        }
+
+        public static void Clear(long conversationId)
+        {
+            if (conversationId != VkQueue.ConversationId)
             {
-                VkQueue.VkApi.Messages.Delete(new[] {(ulong) VkQueue.MessageId}, null, null, true);
-                VkQueue.MessageId = -1;
-                VkQueue.Message = "";
-                VkQueue.PeerQueue = new Queue<User>();
+                VkModule.SendMessageInConversation(VkQueue.VkApi, "Невозможно очистить очередь в другой беседе", conversationId, Utilities.Random.Next());
+                return;
             }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+
+            VkModule.DeleteMessageInConversation(VkQueue.VkApi, VkQueue.ConversationId, VkQueue.MessageId, true);
         }
 
     }

@@ -8,20 +8,21 @@ namespace VkQueue
 { 
     internal static class VkQueue
     {
-        public static Queue<User> PeerQueue { get; set; } = new Queue<User>();
+        public static Queue<User> ConversationQueue { get; set; } = new Queue<User>();
         
         public static VkApi VkApi { get; set; }
 
         public static long MessageId { get; set; } = -1;
 
-        public static string Message { get; set; } = "";
+        public static long ConversationId { get; set; } = -1;
 
+        public static string Message { get; set; } = "";
 
         public static bool ObjContains(User obj)
         {
             var userEquality = new UserEquality();
             
-            return PeerQueue.Contains(obj, userEquality);
+            return ConversationQueue.Contains(obj, userEquality);
         }
     }
 

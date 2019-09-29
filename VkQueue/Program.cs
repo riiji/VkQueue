@@ -9,7 +9,7 @@ namespace VkQueue
     { 
         public async Task MainAsync()
         {
-            VkQueue.VkApi = VkAuth.GetVkApi("login", "password");
+            VkQueue.VkApi = VkModule.GetVkApi("login", "password");
 
             var longPollServer = VkQueue.VkApi.Messages.GetLongPollServer();
 
