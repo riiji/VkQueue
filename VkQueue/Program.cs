@@ -19,7 +19,7 @@ namespace VkQueue
             await Task.Delay(-1);
         }
 
-        private async void LongPollRequestAsync(LongPollServerResponse longPollServer)
+        private static async void LongPollRequestAsync(LongPollServerResponse longPollServer)
         {
             var response = await $"https://{longPollServer.Server}?act=a_check&key={longPollServer.Key}&ts={longPollServer.Ts}&wait=25&mode=2&version=2".GetStringAsync();
 

@@ -53,27 +53,27 @@ namespace VkQueue
             switch (command)
             {
                 case "push" when conversationId >= 2000000000:
-                    Commands.Push(conversationId, userId.From);
+                    Commands.Instance.Push(conversationId, userId.From);
                     break;
 
                 case "push" when conversationId < 2000000000:
-                    Commands.PushInPM(conversationId);
+                    Commands.Instance.PushInPM(conversationId);
                     break;
 
                 case "pop" when conversationId >= 2000000000:
-                    Commands.Pop(conversationId);
+                    Commands.Instance.Pop(conversationId);
                     break;
 
                 case "pop" when conversationId < 2000000000:
-                    Commands.PopInPM(conversationId);
+                    Commands.Instance.PopInPM(conversationId);
                     break;
 
                 case "up" when conversationId >= 2000000000:
-                    Commands.Up(conversationId, userId.From);
+                    Commands.Instance.Up(conversationId, userId.From);
                     break;
 
                 case "clear" when conversationId >= 2000000000:
-                    Commands.Clear(conversationId);
+                    Commands.Instance.Clear(conversationId);
                     break;
             }
         }

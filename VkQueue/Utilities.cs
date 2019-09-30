@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Json;
 using Newtonsoft.Json;
-using VkNet.Model;
 
 namespace VkQueue
 {
@@ -11,16 +8,7 @@ namespace VkQueue
     {
         public static Config GetConfig()
         {
-            DataContractJsonSerializer jsonFormatter = new DataContractJsonSerializer(typeof(Config));
-
-            Config cfg;
-
-            using (var fs = new FileStream("config.json", FileMode.Open))
-            {
-                cfg = (Config)jsonFormatter.ReadObject(fs);
-            }
-
-            return cfg;
+            return JsonConvert.DeserializeObject<Config>(File.ReadAllText("config.json"));
         }
 
         public static Random Random { get; set; } = new Random();

@@ -10,7 +10,7 @@ namespace VkQueue.VkObjects
 {
     internal class VkModule
     {
-        public static VkApi VkApi { get; set; }
+        public VkApi VkApi { get; set; }
 
         public VkApi GetVkApi(Config cfg)
         {
@@ -135,11 +135,11 @@ namespace VkQueue.VkObjects
             }
         }
 
-        public User GetUser(VkApi api, long userId)
+        public User GetUser(long userId)
         {
             try
             {
-                return api.Users.Get(new[] { userId })[0];
+                return VkApi.Users.Get(new[] { userId })[0];
             }
             catch (Exception e)
             {
