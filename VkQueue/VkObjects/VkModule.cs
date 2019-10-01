@@ -10,7 +10,16 @@ namespace VkQueue.VkObjects
 {
     internal class VkModule
     {
+
         public VkApi VkApi { get; set; }
+
+        public VkQueue VkQueue { get; set; }
+
+        public VkModule(Config cfg)
+        {
+            VkApi = GetVkApi(cfg);
+        }
+        
 
         public VkApi GetVkApi(Config cfg)
         {
@@ -69,12 +78,12 @@ namespace VkQueue.VkObjects
             {
                 VkApi.Messages.Edit(new MessageEditParams
                 {
-                    MessageId = VkQueue.Instance.MessageId,
+                    MessageId = VkQueue.MessageId,
                     PeerId = conversationId,
-                    Message = VkQueue.Instance.Message
+                    Message = VkQueue.Message
                 });
 
-                VkQueue.Instance.Message = message;
+                VkQueue.Message = message;
 
                 Console.WriteLine(new LogMessage("VkModule", $"Message {messageId} edited"));
 
@@ -92,7 +101,7 @@ namespace VkQueue.VkObjects
                 VkApi.Messages.Delete(new[] { (ulong)messageId }, null, null, true);
 
                 if (clear)
-                    VkQueue.Instance = new VkQueue();
+                    VkQueue = new VkQueue();
 
                 Console.WriteLine(new LogMessage("VkModule", $"Message {messageId} deleted"));
             }
@@ -109,7 +118,7 @@ namespace VkQueue.VkObjects
             var newMessageId = SendMessageInConversation(message, conversationId, randomId);
 
             if (newMessageId != null)
-                VkQueue.Instance.MessageId = (long)newMessageId;
+                VkQueue.MessageId = (long)newMessageId;
         }
 
         public long? SendMessageInPM(string message, long userId, int randomId)

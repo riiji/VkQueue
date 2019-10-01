@@ -6,8 +6,6 @@ namespace VkQueue
 { 
     internal class VkQueue
     {
-        public static VkQueue Instance = new VkQueue();
-
         public Queue<User> ConversationQueue { get; set; } = new Queue<User>();
         
         public long MessageId { get; set; } = -1;

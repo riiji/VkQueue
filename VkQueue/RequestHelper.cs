@@ -1,12 +1,20 @@
 ﻿using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VkQueue.VkObjects;
 
 namespace VkQueue
 {
-    internal static class RequestHelper
+    internal class RequestHelper
     {
-        public static async void RequestHandlerAsync(IVkResponse response)
+        private readonly Commands _commands;
+
+        public RequestHelper(Commands commands)
+        {
+            _commands = commands;
+        }
+
+        public async void RequestHandlerAsync(IVkResponse response)
         {
             int value;
 
@@ -30,13 +38,13 @@ namespace VkQueue
 
         }
 
-        private static void CommandHandler(IVkResponse response)
+        private void CommandHandler(IVkResponse response)
         {
             // get a message text
             string text = response.Updates[0][5];
 
             // get a user id
-            VkId userId = Utilities.ConvertJsonToObject<VkId>((response.Updates[0][6] as JObject).ToString());
+            VkId userId = JsonConvert.DeserializeObject<VkId>((response.Updates[0][6] as JObject).ToString());
 
             // get a conversation id
             long conversationId = response.Updates[0][3];
@@ -53,27 +61,27 @@ namespace VkQueue
             switch (command)
             {
                 case "push" when conversationId >= 2000000000:
-                    Commands.Instance.Push(conversationId, userId.From);
+                    _commands.Push(conversationId, userId.From);
                     break;
 
                 case "push" when conversationId < 2000000000:
-                    Commands.Instance.PushInPM(conversationId);
+                    _commands.PushInPM(conversationId);
                     break;
 
                 case "pop" when conversationId >= 2000000000:
-                    Commands.Instance.Pop(conversationId);
+                    _commands.Pop(conversationId);
                     break;
 
                 case "pop" when conversationId < 2000000000:
-                    Commands.Instance.PopInPM(conversationId);
+                    _commands.PopInPM(conversationId);
                     break;
 
                 case "up" when conversationId >= 2000000000:
-                    Commands.Instance.Up(conversationId, userId.From);
+                    _commands.Up(conversationId, userId.From);
                     break;
 
                 case "clear" when conversationId >= 2000000000:
-                    Commands.Instance.Clear(conversationId);
+                    _commands.Clear(conversationId);
                     break;
             }
         }

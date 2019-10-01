@@ -1,22 +1,10 @@
 ﻿using System;
-using System.IO;
-using Newtonsoft.Json;
 
 namespace VkQueue
 {
     internal static class Utilities
     {
-        public static Config GetConfig()
-        {
-            return JsonConvert.DeserializeObject<Config>(File.ReadAllText("config.json"));
-        }
-
         public static Random Random { get; set; } = new Random();
-
-        public static T ConvertJsonToObject<T>(string s)
-        {
-            return JsonConvert.DeserializeObject<T>(s);
-        }
 
         public static string RemoveFirstLine(string s)
         {
