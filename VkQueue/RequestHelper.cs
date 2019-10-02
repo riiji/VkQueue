@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VkQueue.Exceptions;
 using VkQueue.VkObjects;
 
 namespace VkQueue
@@ -57,32 +59,39 @@ namespace VkQueue
             // get command from text
             var command = text.Substring(0, spaceIndex);
 
-            // if conversationId < 2000000000, its not a conversation, its a dialog check documentation vk api
-            switch (command)
+            try
             {
-                case "push" when conversationId >= 2000000000:
-                    _commands.Push(conversationId, userId.From);
-                    break;
+                // if conversationId < 2000000000, its not a conversation, its a dialog check documentation vk api
+                switch (command)
+                {
+                    case "push" when conversationId >= 2000000000:
+                        _commands.Push(conversationId, userId.From);
+                        break;
 
-                case "push" when conversationId < 2000000000:
-                    _commands.PushInPM(conversationId);
-                    break;
+                    case "push" when conversationId < 2000000000:
+                        _commands.PushInPM(conversationId);
+                        break;
 
-                case "pop" when conversationId >= 2000000000:
-                    _commands.Pop(conversationId);
-                    break;
+                    case "pop" when conversationId >= 2000000000:
+                        _commands.Pop(conversationId);
+                        break;
 
-                case "pop" when conversationId < 2000000000:
-                    _commands.PopInPM(conversationId);
-                    break;
+                    case "pop" when conversationId < 2000000000:
+                        _commands.PopInPM(conversationId);
+                        break;
 
-                case "up" when conversationId >= 2000000000:
-                    _commands.Up(conversationId, userId.From);
-                    break;
+                    case "up" when conversationId >= 2000000000:
+                        _commands.Up(conversationId, userId.From);
+                        break;
 
-                case "clear" when conversationId >= 2000000000:
-                    _commands.Clear(conversationId);
-                    break;
+                    case "clear" when conversationId >= 2000000000:
+                        _commands.Clear(conversationId);
+                        break;
+                }
+            }
+            catch(VkBotException e)
+            {
+                Console.WriteLine(new LogMessage("VkModule",e.Message));
             }
         }
     }

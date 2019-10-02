@@ -5,6 +5,7 @@ using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
 using VkNet.Model;
 using VkNet.Model.RequestParams;
+using VkQueue.Exceptions;
 
 namespace VkQueue.VkObjects
 {
@@ -18,6 +19,7 @@ namespace VkQueue.VkObjects
         public VkModule(Config cfg)
         {
             VkApi = GetVkApi(cfg);
+            VkQueue = new VkQueue();
         }
         
 
@@ -38,10 +40,9 @@ namespace VkQueue.VkObjects
 
                 Console.WriteLine(new LogMessage("VkModule", "Auth successful"));
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine($"Can't auth cause {e.Message}");
-                return null;
+                throw new VkBotException("Can't get vk api");
             }
 
             VkApi = result;
@@ -65,10 +66,9 @@ namespace VkQueue.VkObjects
 
                 return messageId;
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(new LogMessage("VkModule", $"Can't send message cause {e.Message}"));
-                return null;
+                throw new VkBotException("Can't send message in conversation");
             }
         }
 
@@ -88,9 +88,9 @@ namespace VkQueue.VkObjects
                 Console.WriteLine(new LogMessage("VkModule", $"Message {messageId} edited"));
 
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(new LogMessage("VkModule", $"Can't edit message cause {e.Message}'"));
+                throw new VkBotException("Can't edit message in conversation");
             }
         }
 
@@ -105,9 +105,9 @@ namespace VkQueue.VkObjects
 
                 Console.WriteLine(new LogMessage("VkModule", $"Message {messageId} deleted"));
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(new LogMessage("VkModule", $"Can't delete message cause {e.Message}'"));
+                throw new VkBotException("Can't delete message in conversation");
             }
         }
 
@@ -137,10 +137,9 @@ namespace VkQueue.VkObjects
                 return messageId;
 
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(new LogMessage("VkModule", $"Can't send message in PM cause {e.Message}"));
-                return null;
+                throw new VkBotException("Can't send message in PM");
             }
         }
 
@@ -150,10 +149,9 @@ namespace VkQueue.VkObjects
             {
                 return VkApi.Users.Get(new[] { userId })[0];
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(new LogMessage("VkModule", $"Can't get user cause {e.Message}"));
-                return null;
+                throw new VkBotException("Can't get user");
             }
         }
 
