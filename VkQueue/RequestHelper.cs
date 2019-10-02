@@ -87,6 +87,14 @@ namespace VkQueue
                     case "clear" when conversationId >= 2000000000:
                         _commands.Clear(conversationId);
                         break;
+
+                    case "show" when conversationId >= 2000000000:
+                        _commands.Show(conversationId);
+                        break;
+
+                    case "restart":
+                        _commands.Restart(conversationId);
+                        break;
                 }
             }
             catch(VkBotException e)

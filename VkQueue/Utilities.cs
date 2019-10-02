@@ -4,8 +4,6 @@ namespace VkQueue
 {
     internal static class Utilities
     {
-        public static Random Random { get; set; } = new Random();
-
         public static string RemoveFirstLine(string s)
         {
             var fi = -1;

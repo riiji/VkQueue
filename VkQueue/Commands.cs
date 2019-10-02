@@ -1,9 +1,14 @@
-﻿using VkQueue.VkObjects;
+﻿using System;
+using System.IO;
+using Newtonsoft.Json;
+using VkQueue.VkObjects;
 
 namespace VkQueue
 {
     internal class Commands
     {
+        private readonly Random _randomId = new Random();
+
         public Commands(VkModule vkModule)
         {
             _vkModule = vkModule;
@@ -31,7 +36,7 @@ namespace VkQueue
                 _vkModule.VkQueue.Message = $"Очередь:\n{user.FirstName} {user.LastName}\n";
 
                 var messageId = _vkModule.SendMessageInConversation(_vkModule.VkQueue.Message, conversationId,
-                    Utilities.Random.Next());
+                    _randomId.Next());
 
                 if (messageId != null)
                 {
@@ -44,7 +49,7 @@ namespace VkQueue
                 if (_vkModule.VkQueue.ConversationId != conversationId)
                 {
                     _vkModule.SendMessageInConversation("Очередь уже создана в другой беседе",
-                        conversationId, Utilities.Random.Next());
+                        conversationId, _randomId.Next());
                     return;
                 }
 
@@ -60,7 +65,7 @@ namespace VkQueue
             if (_vkModule.VkQueue.MessageId == -1)
             {
                 _vkModule.SendMessageInPM("Невозможно создать очередь в личных сообщениях",
-                    userId, Utilities.Random.Next());
+                    userId, _randomId.Next());
             }
             else
             {
@@ -86,7 +91,7 @@ namespace VkQueue
             if (_vkModule.VkQueue.ConversationId != -1 && _vkModule.VkQueue.ConversationId != conversationId)
             {
                 _vkModule.SendMessageInConversation("Невозможно вызвать pop в другой беседе",
-                    conversationId, Utilities.Random.Next());
+                    conversationId, _randomId.Next());
                 return;
             }
 
@@ -106,16 +111,24 @@ namespace VkQueue
             }
         }
 
+        internal void Restart(long conversationId)
+        {
+            var config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("config.json"));
+            _vkModule.Restart(config);
+
+            _vkModule.SendMessageInConversation("Бот перезапущен!", conversationId, _randomId.Next());
+        }
+
         public void PopInPM(long userId)
         {
             _vkModule.SendMessageInPM("Нельзя вызвать pop в личных сообщениях", userId,
-                Utilities.Random.Next());
+                _randomId.Next());
         }
 
         public void Up(long conversationId, long userId)
         {
             _vkModule.UpMessageInConversation( _vkModule.VkQueue.Message,
-                _vkModule.VkQueue.ConversationId, _vkModule.VkQueue.MessageId, Utilities.Random.Next());
+                _vkModule.VkQueue.ConversationId, _vkModule.VkQueue.MessageId, _randomId.Next());
         }
 
         public void Clear(long conversationId)
@@ -123,12 +136,23 @@ namespace VkQueue
             if (conversationId != _vkModule.VkQueue.ConversationId)
             {
                 _vkModule.SendMessageInConversation(
-                    "Невозможно очистить очередь в другой беседе", conversationId, Utilities.Random.Next());
+                    "Невозможно очистить очередь в другой беседе", conversationId, _randomId.Next());
                 return;
             }
 
             _vkModule.DeleteMessageInConversation(_vkModule.VkQueue.ConversationId,
                 _vkModule.VkQueue.MessageId, true);
+        }
+
+        public void Show(long conversationId)
+        {
+            if (conversationId != _vkModule.VkQueue.ConversationId)
+            {
+                _vkModule.SendMessageInConversation(
+                    "Невозможно показать очередь в другой беседе", conversationId, _randomId.Next());
+            }
+
+            _vkModule.ShowMessageInConversation(_vkModule.VkQueue.ConversationId,_randomId.Next());
         }
     }
 }

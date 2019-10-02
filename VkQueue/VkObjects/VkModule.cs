@@ -153,6 +153,20 @@ namespace VkQueue.VkObjects
             }
         }
 
+        internal void ShowMessageInConversation(long conversationId, int randomId)
+        {
+            var messageId = SendMessageInConversation(VkQueue.Message, conversationId, randomId);
 
+            if (messageId == null)
+                return;
+
+            VkQueue.MessageId = (long)messageId;
+        }
+
+        internal void Restart(Config cfg)
+        {
+            VkApi.LogOut();
+            GetVkApi(cfg);
+        }
     }
 }
