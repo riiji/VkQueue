@@ -1,19 +1,13 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace VkQueue
 {
-    class LogMessage
+    static class Log
     {
-        private string Message { get; }
-
-        public LogMessage(string source, string message)
+        public static void Message(string source, string message)
         {
-            Message = $"{DateTime.Now} | {source} : {message}";
-        }
-
-        public override string ToString()
-        {
-            return Message;
+            Console.WriteLine($"{DateTime.Now} | {source} : {message}");
         }
     }
 }

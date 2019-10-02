@@ -91,7 +91,7 @@ namespace VkQueue
             }
             catch(VkBotException e)
             {
-                Console.WriteLine(new LogMessage("VkModule",e.Message));
+                Log.Message("VkModule",e.Message);
             }
         }
     }
