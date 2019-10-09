@@ -36,15 +36,26 @@ namespace VkQueue
 
         private async void LongPollRequestAsync(LongPollServerResponse longPollServer)
         {
-            var response = await $"https://{longPollServer.Server}?act=a_check&key={longPollServer.Key}&ts={longPollServer.Ts}&wait=25&mode=2&version=2".GetStringAsync();
+            try
+            {
+                var response =
+                    await
+                        $"https://{longPollServer.Server}?act=a_check&key={longPollServer.Key}&ts={longPollServer.Ts}&wait=25&mode=2&version=2"
+                            .GetStringAsync();
 
-            var vkResponse = JsonConvert.DeserializeObject<VkResponse>(response);
 
-            longPollServer.Ts = vkResponse.Ts.ToString();
+                var vkResponse = JsonConvert.DeserializeObject<VkResponse>(response);
 
-            await Task.Run(() => LongPollRequestAsync(longPollServer));
+                longPollServer.Ts = vkResponse.Ts.ToString();
 
-            await Task.Run(() => _requestHelper.RequestHandlerAsync(vkResponse));
+                await Task.Run(() => LongPollRequestAsync(longPollServer));
+
+                await Task.Run(() => _requestHelper.RequestHandlerAsync(vkResponse));
+            }
+            catch
+            {
+
+            }
         }
 
         private static void Main() => new Program().MainAsync().GetAwaiter().GetResult();
