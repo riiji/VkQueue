@@ -54,7 +54,7 @@ namespace VkQueue
             }
             catch
             {
-
+                LongPollRequestAsync(_vkModule.VkApi.Messages.GetLongPollServer());
             }
         }
 
